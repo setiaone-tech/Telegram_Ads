@@ -1,0 +1,270 @@
+:root {
+  --bg-color: #171f3a;
+}
+
+body {
+  font-family: "Inter";
+}
+
+.dashboard-container {
+  background: var(--bg-color);
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  transition: margin-left 0.3s ease; /* smooth transition when sidebar toggles */
+}
+
+.main-sidebar {
+  height: inherit;
+  min-height: 100%;
+  position: absolute;
+  top: 0;
+  background-color: #141b2c;
+  width: 15%;
+}
+
+.brand-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: width 0.3s ease-in-out;
+  font-size: 20px;
+  font-weight: 600;
+  margin-inline: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+hr.pt-0.pb-0 {
+  margin-top: 0; /* Menghapus margin atas */
+  margin-bottom: 0; /* Menghapus margin bawah */
+  padding-top: 0; /* Menghapus padding atas */
+  padding-bottom: 0; /* Menghapus padding bawah */
+  border-top: 1px solid white; /* Menambahkan border atas sesuai kebutuhan */
+}
+
+.brand-link .brand-image {
+  float: left;
+  line-height: 0.8;
+  margin-left: 0.8rem;
+  margin-right: 0.5rem;
+  margin-top: -3px;
+  max-height: 33px;
+  width: auto;
+}
+
+.img-circle {
+  border-radius: 50%;
+}
+
+.elevation-3 {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23) !important;
+}
+
+.brand-text {
+  transition: margin-left 0.3s linear, opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Sidebar styles */
+.sidebar {
+  height: calc(100% - (3.5rem + 1px));
+  overflow-x: hidden;
+  overflow-y: initial;
+  padding-bottom: 0;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0;
+  scrollbar-color: #a9a9a9 transparent;
+  scrollbar-width: none;
+}
+
+.sidebar a {
+  color: white;
+  padding: 10px 15px;
+  text-decoration: none;
+  display: block;
+}
+
+.sidebar a:hover {
+  background-color: #575d78;
+}
+
+.sidebar .active {
+  background-color: #4e5d73;
+}
+
+/* Content area */
+.content {
+  padding: 30px;
+  width: 100%;
+  transition: margin-left 0.3s ease; /* Smooth transition when content margin changes */
+}
+
+/* Custom Styles */
+.card-container {
+  margin: 20px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.1); /* Dark color */
+  color: white;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 50px;
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.card-inte {
+  margin-top: 50px;
+  border-radius: 15px; /* Rounded corners for the card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for card */
+  width: 50%;
+}
+
+.card-inte-header {
+  background-color: #1e88e5;
+  color: white;
+  font-size: 1.5rem;
+  text-align: center;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  padding: 15px 0;
+}
+
+.card-inte-body {
+  padding: 25px;
+}
+
+.card-inte .form-label {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.card-inte .btn-inte {
+  background-color: #1e88e5;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.card-inte .btn-inte:hover {
+  background-color: #1565c0;
+}
+
+.card-inte .btn-outline-secondary {
+  border-radius: 5px;
+  padding: 10px 20px;
+}
+
+/* Media query untuk responsif */
+@media (max-width: 768px) {
+  .card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Untuk scrolling halus di iOS */
+  }
+  .content {
+    margin-left: 0;
+  }
+  .card-inte-header {
+    font-size: 1.2rem;
+    padding: 10px 0;
+  }
+
+  .card-inte-body {
+    padding: 15px;
+  }
+
+  .card-inte .btn-inte,
+  .card-inte .btn-outline-secondary {
+    width: 100%; /* Make buttons full width on small screens */
+  }
+}
+
+.burger-menu {
+  font-size: 30px;
+  display: block;
+  cursor: pointer;
+}
+
+/* Hamburger icon when clicked */
+.burger-menu span {
+  color: #fff;
+  font-size: 30px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td input,
+td button {
+  width: 100%; /* Agar input dan tombol mengisi seluruh lebar td */
+  box-sizing: border-box; /* Menghindari padding yang menambah lebar */
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: center;
+  align-items: center;
+}
+
+th {
+  max-width: 200px; /* Tetapkan lebar kolom th */
+  word-wrap: break-word; /* Membungkus kata jika panjang melebihi lebar */
+  overflow-wrap: break-word; /* Untuk memastikan teks panjang dipecah */
+}
+
+td {
+  max-width: 200px;
+  word-wrap: break-word; /* Membungkus kata jika melebihi lebar */
+  overflow-wrap: break-word; /* Untuk memastikan teks panjang dipecah */
+}
+
+thead {
+  border-bottom: 2px solid #171f3a; /* Border hanya di bagian bawah header */
+}
+
+input {
+  border-radius: 10px;
+  border: 1px solid #fff;
+  background: none;
+  color: white;
+}
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #2b2b4d;
+}
+.bottom-bar .nav-link {
+  color: #fff;
+  text-align: center; /* Center align text */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px; /* Adjust font size for text */
+}
+.bottom-bar .nav-link i {
+  font-size: 20px; /* Size of the icon */
+}
+.bottom-bar .nav-link:hover {
+  color: #4e4e80;
+}

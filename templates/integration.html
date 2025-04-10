@@ -1,0 +1,72 @@
+{% extends 'template.html' %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-9 d-flex">
+    <div class="card flex-fill">
+      <div class="card-inte-body">
+        <form class="row g-3" action="/integration" method="POST">
+          <!-- Email Input -->
+          <div class="col-md-6">
+            <label for="email" class="form-label">Bot Token</label>
+            <input
+              type="text"
+              class="form-control"
+              name="tokenbot"
+              value="{{data[1]}}"
+            />
+          </div>
+
+          <!-- Password Input -->
+          <div class="col-md-6">
+            <label for="password" class="form-label">Web App</label>
+            <input
+              type="text"
+              class="form-control"
+              name="webapp"
+              value="{{data[2]}}"
+            />
+          </div>
+
+          <div class="col-md-6">
+            <label for="password" class="form-label">Webhook URL</label>
+            <input
+              type="text"
+              class="form-control"
+              name="webhook"
+              id="webhook"
+              readonly
+            />
+          </div>
+
+          <div class="col-md-6">
+            <label for="password" class="form-label">Min. Withdraw</label>
+            <input
+              type="text"
+              class="form-control"
+              name="min-wd"
+              id="min-wd"
+              value="{{data[3]}}"
+            />
+          </div>
+
+          <div class="col-md-6">
+            <label for="js-tags" class="form-label">JS Tag Ads (RichAds)</label>
+            <textarea class="form-control" name="js-tags" id="js-tags" rows="7">
+{{data[4]}}</textarea
+            >
+          </div>
+
+          <!-- Buttons -->
+          <div class="col-12">
+            <button type="submit" class="btn btn-info">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  let hostname = window.location.hostname;
+  document.getElementById("webhook").value = `${hostname}/webhook`;
+</script>
+{% endblock %}

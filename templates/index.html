@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Rewards</title>
+
+    <!-- External scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+    {{data[4] | safe}}
+
+    <!-- Styles -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <style>
+      /* Import modern fonts */
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
+
+      /* Reset and base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Outfit", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #ffffff;
+        min-height: 100vh;
+        padding: 0 0 80px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Header area */
+      .header {
+        width: 100%;
+        padding: 25px 20px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 70%
+        );
+        z-index: -1;
+      }
+
+      .header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #ffffff, #a5b4fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -0.5px;
+      }
+
+      /* Balance display - FIXED */
+      .balance-card {
+        margin: 20px auto; /* Changed from margin-top to center horizontally */
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 20px;
+        width: 90%;
+        max-width: 340px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center content horizontally */
+        justify-content: center; /* Center content vertically */
+        text-align: center; /* Ensure text is centered */
+      }
+
+      .balance-card::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(
+          135deg,
+          rgba(165, 180, 252, 0.3),
+          transparent
+        );
+        border-radius: 50%;
+        z-index: 0;
+      }
+
+      .balance-label {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 5px;
+        z-index: 1;
+        width: 100%; /* Ensure full width */
+        text-align: center; /* Explicitly center text */
+      }
+
+      .balance-amount {
+        font-size: 36px;
+        font-weight: 700;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Center the amount and currency */
+        z-index: 1;
+        width: 100%; /* Ensure full width */
+      }
+
+      .currency {
+        font-size: 16px;
+        margin-left: 5px;
+        color: rgba(255, 255, 255, 0.7);
+        align-self: flex-end; /* Align with the bottom of the number */
+        padding-bottom: 5px; /* Fine-tune the vertical alignment */
+      }
+
+      /* Info hint */
+      .info-hint {
+        margin: 20px auto;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50px;
+        padding: 12px 24px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.7);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 90%; /* Makes it responsive */
+        width: fit-content; /* Adjusts width to content */
+        text-align: center; /* Centers text */
+      }
+
+      .info-hint i {
+        margin-right: 8px;
+        color: #a5b4fc;
+      }
+
+      /* Add this for container responsiveness if needed */
+      .info-hint-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+
+      /* Error message */
+      .error-message {
+        background: rgba(220, 38, 38, 0.2);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        padding: 12px 20px;
+        margin: 15px auto;
+        max-width: 340px;
+        text-align: center;
+        font-size: 14px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .error-message i {
+        margin-right: 8px;
+        color: #ef4444;
+      }
+
+      /* Tasks section */
+      .tasks-container {
+        width: 100%;
+        max-width: 340px;
+        margin-top: 20px;
+      }
+
+      .task-card {
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 16px;
+        margin-bottom: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+      }
+
+      .task-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .task-header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .task-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(165, 180, 252, 0.15);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+      }
+
+      .task-icon i {
+        font-size: 18px;
+        color: #a5b4fc;
+      }
+
+      .task-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+
+      .task-subtitle {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .task-action {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .reward-badge {
+        background: rgba(165, 180, 252, 0.15);
+        color: #a5b4fc;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+      }
+
+      .reward-badge i {
+        margin-right: 6px;
+        font-size: 12px;
+      }
+
+      .claim-button {
+        background: linear-gradient(90deg, #a5b4fc, #818cf8);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .claim-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(129, 140, 248, 0.3);
+      }
+
+      .claim-button:disabled {
+        background: linear-gradient(90deg, #a5b4fc50, #818cf850);
+        color: rgba(255, 255, 255, 0.5);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      /* Success popup */
+      .success-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(17, 24, 39, 0.95);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        max-width: 300px;
+        width: 90%;
+        text-align: center;
+        display: none;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .success-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(165, 180, 252, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+      }
+
+      .success-icon i {
+        font-size: 35px;
+        color: #a5b4fc;
+      }
+
+      .success-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #ffffff;
+      }
+
+      .success-message {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .claim-reward-btn {
+        background: linear-gradient(90deg, #a5b4fc, #818cf8);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+
+      .claim-reward-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(129, 140, 248, 0.3);
+      }
+
+      /* Navigation bar */
+      .navigation {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-around;
+        padding: 15px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 100;
+      }
+
+      .nav-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        font-size: 12px;
+        padding: 8px 0;
+        width: 33%;
+        transition: all 0.3s ease;
+      }
+
+      .nav-button i {
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+
+      .nav-button:hover,
+      .nav-button.active {
+        color: #a5b4fc;
+      }
+
+      /* Confetti effect */
+      .confetti {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background-color: #a5b4fc;
+        opacity: 0;
+        animation: confetti-fall 3s linear infinite;
+        z-index: 999;
+      }
+
+      @keyframes confetti-fall {
+        0% {
+          transform: translateY(-100px) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* Ad blocker message */
+      .adblock-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(17, 24, 39, 0.95);
+        border-radius: 16px;
+        padding: 25px;
+        max-width: 300px;
+        width: 90%;
+        text-align: center;
+        z-index: 9999;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .adblock-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .adblock-message p {
+        margin-bottom: 10px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+      }
+
+      .reload-button {
+        background: linear-gradient(90deg, #a5b4fc, #818cf8);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 15px;
+        width: 100%;
+      }
+
+      .reload-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(129, 140, 248, 0.3);
+      }
+
+      /* Ad banner styling */
+      .ad-banner {
+        width: 100%;
+        max-width: 340px;
+        margin: 20px auto;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        /* Add display flex to center content */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Ensure the banner image is properly centered */
+      .ad-banner img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 80%; /* or whatever percentage/fixed width you prefer */
+        text-align: center;
+      }
+
+      /* Make sure the text container is full width */
+      .ad-banner-text {
+        position: relative;
+        padding: 10px;
+        color: #ffffff;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+        font-size: 14px;
+        font-weight: 600;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        border-radius: 0 0 12px 12px;
+        width: 100%; /* Ensure full width */
+        text-align: center; /* Center the text */
+      }
+
+      /* Fix for the link element to ensure proper centering */
+      .ad-link {
+        color: #ffffff;
+        text-decoration: none;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        font-size: 13px;
+        margin: 8px auto 0;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        background: linear-gradient(90deg, #f44336, #ff9800);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+      }
+
+      /* Add shine effect animation on banner */
+      .ad-banner::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        transform: rotate(30deg);
+        animation: shine 3s infinite;
+      }
+
+      @keyframes shine {
+        0% {
+          transform: rotate(30deg) translate(-100%, -100%);
+        }
+        100% {
+          transform: rotate(30deg) translate(100%, 100%);
+        }
+      }
+
+      /* Withdraw form and history styles */
+      .withdraw-form-container,
+      .history-container {
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 16px;
+        margin: 20px auto;
+        padding: 20px;
+        width: 90%;
+        max-width: 340px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: none;
+      }
+
+      .withdraw-form-container h2,
+      .history-container h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-align: center;
+        background: linear-gradient(90deg, #ffffff, #a5b4fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 5px;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 14px;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #a5b4fc;
+        box-shadow: 0 0 0 2px rgba(165, 180, 252, 0.3);
+      }
+
+      .submit-button {
+        background: linear-gradient(90deg, #a5b4fc, #818cf8);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 25px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(129, 140, 248, 0.3);
+      }
+
+      /* Transaction history styles */
+      .transaction-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .transaction-item {
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .transaction-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .transaction-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+      }
+
+      .transaction-date {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .transaction-amount {
+        font-weight: 600;
+        color: #a5b4fc;
+      }
+
+      .transaction-amount.pending {
+        color: #fbbf24;
+      }
+
+      .transaction-amount.completed {
+        color: #34d399;
+      }
+
+      .transaction-amount.rejected {
+        color: #f87171;
+      }
+
+      .transaction-method {
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+
+      .transaction-status {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      .status-pending {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+      }
+
+      .status-completed {
+        background: rgba(52, 211, 153, 0.2);
+        color: #34d399;
+        border: 1px solid rgba(52, 211, 153, 0.3);
+      }
+
+      .status-rejected {
+        background: rgba(248, 113, 113, 0.2);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.3);
+      }
+
+      .no-transactions {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 14px;
+        padding: 20px 0;
+      }
+
+      .page-content {
+        width: 100%;
+        max-width: 340px;
+        transition: all 0.3s ease;
+      }
+      .wd-history-item {
+        background-color: #3a3a5c;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        padding: 15px;
+      }
+      .wd-history-item .wd-history-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #fff;
+      }
+      .wd-history-item .wd-history-text {
+        color: #bbb;
+        margin-bottom: 5px;
+      }
+      .wd-history-item .wd-history-date {
+        color: #ccc;
+        font-size: 14px;
+      }
+      #regis-content {
+        display: none;
+      }
+      #loadingSpinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 30px;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+      }
+
+      /* Spinner animation */
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #fff;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Responsive adjustments for small screens */
+      @media (max-width: 480px) {
+        .ip-info-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+        }
+
+        .ip-info-value {
+          text-align: left;
+          max-width: 100%;
+        }
+
+      /* Enhanced responsive adjustments */
+      @media (max-width: 360px) {
+        .header h1 {
+          font-size: 24px;
+        }
+
+        .balance-amount {
+          font-size: 32px;
+        }
+
+        .currency {
+          font-size: 14px;
+        }
+
+        .claim-button,
+        .reward-badge {
+          font-size: 12px;
+          padding: 8px 16px;
+        }
+
+        .task-title {
+          font-size: 15px;
+        }
+
+        .profile-img {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          object-fit: cover;
+          margin-bottom: 10px;
+        }
+      }
+    </style>
+    <link
+      rel="me"
+      href="https://www.blogger.com/profile/10804049986906260085"
+    />
+    <meta
+      name="google-adsense-platform-account"
+      content="ca-host-pub-1556223355139109"
+    />
+    <meta name="google-adsense-platform-domain" content="blogspot.com" />
+  </head>
+  <body>
+    <div id="loadingSpinner">
+      <div class="spinner"></div>
+    </div>
+    <div id="regis-content">
+      <div class="container-fluid">
+        <div class="row justify-content-center">
+          <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+            <div class="card-custom">
+              <div class="balance-card">
+                <img
+                  class="profile-img"
+                  id="profileImg"
+                  src="/path/fotoprofil"
+                />
+                <h4 id="userUsername">Username</h4>
+                <p>
+                  Belum terdaftar, silahkan klik tombol dibawah untuk mendaftar.
+                </p>
+                <button class="claim-button" id="regisBtn">Register</button>
+                <input type="hidden" id="userId" name="userId" value="" />
+                <input
+                  type="hidden"
+                  name="fingerprint"
+                  value=""
+                  id="fingerprint"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main page content container -->
+    <div id="home-content" class="page-content">
+      <!-- Balance card -->
+      <div class="balance-card">
+        <div class="balance-label">Your Balance</div>
+        <div class="balance-amount">
+          <span id="user-balance"></span>
+          <span class="currency">IDR</span>
+        </div>
+      </div>
+
+      <!-- Info hint -->
+      <div class="info-hint">
+        <i class="fa fa-info-circle"></i>
+        Tap Reload to load new ads
+      </div>
+
+      <!-- Error message -->
+      <div id="error-message" class="error-message">
+        <i class="fa fa-exclamation-circle"></i>
+        Ads not available. Try again later or use VPN.
+      </div>
+
+      <!-- Tasks section -->
+      <div class="tasks-container" id="task"></div>
+      <div id="richads-banner-container"></div>
+    </div>
+
+    <!-- Withdraw Form Container -->
+    <div id="withdraw-content" class="withdraw-form-container">
+      <h2>Withdraw Funds</h2>
+      <form id="withdraw-form" action="/wd" method="POST">
+        <input type="hidden" name="user_id" id="user_id" />
+        <div class="form-group">
+          <label for="withdraw-amount">Amount (IDR)</label>
+          <input
+            type="number"
+            id="withdraw-amount"
+            name="amount"
+            min="{{data[3]}}"
+            max="1000000"
+            placeholder="Min: {{data[3]}} IDR"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="payment-method">Payment Method</label>
+          <select id="payment-method" name="payment-method" required>
+            <option value="">-- Select Payment Method --</option>
+            <option value="dana">DANA</option>
+            <option value="gopay">GoPay</option>
+            <option value="ovo">OVO</option>
+            <option value="bank">Bank Transfer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="account-number">Account Number / Phone</label>
+          <input
+            type="text"
+            id="account-number"
+            name="account"
+            placeholder="Enter your account number"
+            required
+          />
+        </div>
+        <button type="submit" class="submit-button">Submit Withdrawal</button>
+      </form>
+    </div>
+
+    <!-- History Container -->
+    <div id="history-content" class="history-container">
+      <h2>Withdrawal History</h2>
+      <ul id="transaction-list" class="transaction-list">
+        <!-- Transactions will be added dynamically -->
+        <div class="no-transactions" id="no-history">
+          No withdrawal history found.
+        </div>
+        <div id="history-list"></div>
+      </ul>
+    </div>
+
+    <!-- Success popup -->
+    <div id="banner-pop" class="success-popup">
+      <div class="success-icon">
+        <i class="fa fa-check"></i>
+      </div>
+      <div class="success-title">Claim it!</div>
+      <div class="success-message">You've successfully completed the task.</div>
+      <button
+        class="claim-reward-btn"
+        onclick="claimReward(this)"
+        id="claimReward"
+      ></button>
+    </div>
+
+    <!-- Bottom navigation -->
+    <div class="navigation" id="navigation">
+      <a href="#" class="nav-button active" onclick="showPage('home')">
+        <i class="fa fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="#" class="nav-button" onclick="refreshPage()">
+        <i class="fa fa-sync-alt"></i>
+        <span>Reload</span>
+      </a>
+      <a href="#" class="nav-button" onclick="showPage('withdraw')">
+        <i class="fa fa-money-bill-wave"></i>
+        <span>Withdraw</span>
+      </a>
+      <a href="#" class="nav-button" onclick="showPage('history')">
+        <i class="fa fa-history"></i>
+        <span>History</span>
+      </a>
+    </div>
+
+    <script>
+      document
+        .getElementById("regisBtn")
+        .addEventListener("click", function () {
+          const userUsername =
+            document.getElementById("userUsername").innerHTML;
+          const userId = document.getElementById("userId").value;
+          const fingerprint = document.getElementById("fingerprint").value;
+          const data = {
+            username: userUsername,
+            telegram_id: userId,
+            fingerprint: fingerprint,
+          };
+          fetch("/regis", {
+            method: "POST", // Menggunakan metode POST
+            headers: {
+              "Content-Type": "application/json", // Mengirimkan data dalam format JSON
+            },
+            body: JSON.stringify(data), // Mengonversi data menjadi JSON
+          })
+            .then((response) => response.json()) // Mengonversi respons menjadi JSON
+            .then((data) => {
+              Swal.fire({
+                title: "Pemberitahuan!",
+                text: data.msg,
+                icon: "Info",
+                confirmButtonText: "Ok",
+              });
+              location.reload();
+            })
+            .catch((error) => {
+              // Menangani error jika fetch gagal
+              console.error("Error:", error);
+              document.getElementById("responseData").innerHTML =
+                "Terjadi kesalahan dalam mengirim data";
+            });
+        });
+    </script>
+    <script>
+      async function fetchTelegramProfilePhoto(bot_token, user_id) {
+        try {
+          // Step 1: Get User Profile Photos
+          const photosRes = await fetch(
+            `https://api.telegram.org/bot${bot_token}/getUserProfilePhotos?user_id=${user_id}`
+          );
+          const photosData = await photosRes.json();
+
+          if (
+            photosData.ok &&
+            photosData.result.photos &&
+            photosData.result.photos.length > 0
+          ) {
+            // Step 2: Ambil file_id dari foto pertama
+            const fileId = photosData.result.photos[0][0].file_id;
+
+            // Step 3: Get File Path
+            const fileRes = await fetch(
+              `https://api.telegram.org/bot${bot_token}/getFile?file_id=${fileId}`
+            );
+            const fileData = await fileRes.json();
+
+            if (fileData.ok && fileData.result.file_path) {
+              const photoUrl = `https://api.telegram.org/file/bot${bot_token}/${fileData.result.file_path}`;
+
+              // Misalnya tampilkan di elemen gambar
+              document.getElementById("profileImg").src = photoUrl;
+            } else {
+              console.log("Gagal mendapatkan file_path foto.");
+            }
+          } else {
+            console.log("Pengguna tidak memiliki foto profil.");
+          }
+        } catch (error) {
+          console.error("Error saat fetch foto profil:", error);
+        }
+      }
+    </script>
+    <script>
+      // Initialize the agent at application startup.
+      // If you're using an ad blocker or Brave/Firefox, this import might fail.
+      // Please use the NPM package instead: https://t.ly/ORyXk
+      const fpPromise = import("https://openfpcdn.io/fingerprintjs/v4")
+        .then((FingerprintJS) => FingerprintJS.load())
+        .catch((error) => {
+          // Jika ada kesalahan dalam memuat skrip, kemungkinan karena AdBlock
+          Swal.fire({
+            title: "Peringatan!",
+            text: "Harap matikan adblock.",
+            icon: "error",
+            confirmButtonText: "Try Again",
+          });
+        });
+
+      // Get the visitor identifier when you need it.
+      fpPromise
+        .then((fp) => fp.get())
+        .then((result) => {
+          // Ini adalah visitorId (Fingerprint perangkat)
+          const visitorId = result.visitorId;
+
+          // Jika visitorId tidak ada atau undefined, tampilkan alert
+          if (!visitorId) {
+            Swal.fire({
+              title: "Peringatan!",
+              text: "Harap matikan adblock.",
+              icon: "error",
+              confirmButtonText: "Try Again",
+            });
+          } else {
+            document.getElementById("fingerprint").value = visitorId;
+          }
+        })
+        .catch((error) => {
+          // Menangani kesalahan lain yang mungkin terjadi saat mendapatkan visitorId
+          Swal.fire({
+            title: "Peringatan!",
+            text: "Harap matikan adblock.",
+            icon: "error",
+            confirmButtonText: "Try Again",
+          });
+        });
+    </script>
+
+    <script>
+      // Configuration variables
+      const CONFIG = {
+        rewardAmount: 1000, // Default reward amount in IDR
+        minWithdrawalAmount: {{data[3]}}, // Default minimum withdrawal amount in IDR
+      };
+
+      // Function for debugging
+      function logDebug(message) {
+        console.log(message);
+      }
+
+      // Detect ad blocker
+      function detectAdBlock() {
+        console.log("Starting ad blocker detection...");
+
+        var adBlockDetected = false;
+
+        var adTest = document.createElement("div");
+        adTest.innerHTML = "&nbsp;";
+        adTest.className = "adsbox";
+        document.body.appendChild(adTest);
+
+        window.setTimeout(function () {
+          if (adTest.offsetHeight === 0) {
+            adBlockDetected = true;
+            console.log("Ad blocker detected!");
+            // Set global flag that ads are not available
+            window.adsAvailable = false;
+          } else {
+            console.log("No ad blocker detected");
+          }
+          adTest.remove();
+
+          if (adBlockDetected) {
+            var adBlockMessage = document.createElement("div");
+            adBlockMessage.id = "adblock-message";
+            adBlockMessage.innerHTML = `
+                    <div class="adblock-message">
+                        <div class="adblock-title">Ad Blocker Detected</div>
+                        <p>Please disable your ad blocker to use this platform.</p>
+                        <p>Reload the page after disabling the ad blocker.</p>
+                        <button class="reload-button" onclick="location.reload()">Reload Page</button>
+                    </div>
+                `;
+            document.body.appendChild(adBlockMessage);
+            console.log("Ad blocker message displayed to user");
+          }
+        }, 100);
+      }
+
+      // Create confetti effect
+      function createConfetti() {
+        const confettiCount = 100;
+        const colors = ["#a5b4fc", "#818cf8", "#c4b5fd", "#ddd6fe", "#ede9fe"];
+
+        for (let i = 0; i < confettiCount; i++) {
+          const confetti = document.createElement("div");
+          confetti.className = "confetti";
+          confetti.style.left = Math.random() * 110 + "vw";
+          confetti.style.backgroundColor =
+            colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDelay = Math.random() * 3 + "s";
+          document.body.appendChild(confetti);
+
+          // Remove confetti after animation
+          setTimeout(() => {
+            confetti.remove();
+          }, 3000);
+        }
+      }
+
+      // Check ads availability
+      function checkAdsAvailability() {
+        return window.adsAvailable === true;
+      }
+
+      // Show error message
+      function showErrorMessage() {
+        const errorMessage = document.getElementById("error-message");
+        errorMessage.style.display = "flex";
+
+        // Hide error message after 3 seconds
+        setTimeout(() => {
+          errorMessage.style.display = "none";
+        }, 3000);
+      }
+
+      // Click ad function
+      function klik(buttonElement) {
+        console.log("Ad click button clicked");
+        const reward = buttonElement.getAttribute("data-reward");
+        const task_id = buttonElement.getAttribute("data-id");
+        document.getElementById(
+          "claimReward"
+        ).innerHTML = `Claim ${reward} IDR`;
+        document.getElementById("claimReward").setAttribute("data-id", task_id);
+        document
+          .getElementById("claimReward")
+          .setAttribute("data-reward", reward);
+
+        if (!checkAdsAvailability()) {
+          console.log("Ads not available");
+          showErrorMessage();
+          return;
+        }
+
+        if (
+          window.TelegramAdsController &&
+          typeof window.TelegramAdsController.triggerNativeNotification ===
+            "function"
+        ) {
+          console.log("Attempting to trigger Telegram native notification");
+
+          window.TelegramAdsController.triggerNativeNotification()
+            .then(() => {
+              console.log("Native notification successfully triggered");
+              document.getElementById("banner-pop").style.display = "block";
+
+              // Update the claim button text to show the current reward amount
+              document.querySelector(
+                ".claim-reward-btn"
+              ).textContent = `Claim ${reward} IDR`;
+            })
+            .catch((error) => {
+              console.error("Failed to trigger native notification: ", error);
+              showErrorMessage();
+            });
+        } else {
+          console.log(
+            "TelegramAdsController not available, showing error message"
+          );
+          showErrorMessage();
+        }
+      }
+
+      // Start ad function
+      function startAd(buttonElement) {
+        console.log("startAd function called, opening Telegram channel");
+        const reward = buttonElement.getAttribute("data-reward");
+        const url = buttonElement.getAttribute("data-url");
+        const task_id = buttonElement.getAttribute("data-id");
+        document.getElementById(
+          "claimReward"
+        ).innerHTML = `Claim ${reward} IDR`;
+        document.getElementById("claimReward").setAttribute("data-id", task_id);
+        document
+          .getElementById("claimReward")
+          .setAttribute("data-reward", reward);
+
+        if (!checkAdsAvailability()) {
+          console.log("Ads not available");
+          showErrorMessage();
+          return;
+        }
+
+        localStorage.setItem("adClicked", "true");
+
+        // Open in new tab
+        window.open(url, "_blank");
+
+        // Show banner after delay
+        setTimeout(() => {
+          console.log("Showing reward banner after delay");
+          document.getElementById("banner-pop").style.display = "block";
+
+          // Update the claim button text to show the current reward amount
+          document.querySelector(
+            ".claim-reward-btn"
+          ).textContent = `Claim ${reward} IDR`;
+        }, 3000);
+      }
+
+      // Claim reward function
+      function claimReward(buttonElement) {
+        document.getElementById("banner-pop").style.display = "none";
+
+        // Only add balance if ads are available
+        if (checkAdsAvailability()) {
+          // Confetti effect
+          createConfetti();
+
+          task_id = buttonElement.getAttribute("data-id");
+          reward = buttonElement.getAttribute("data-reward");
+          const tg = window.Telegram.WebApp;
+          const user_id = tg.initDataUnsafe.user.id;
+
+          const formData = {
+            user_id: user_id,
+            task_id: task_id,
+          };
+
+          fetch("/submit", {
+            method: "POST", // Metode request (POST)
+            headers: {
+              "Content-Type": "application/json", // Mengirim data dalam format JSON
+            },
+            body: JSON.stringify(formData), // Mengirim data sebagai JSON
+          })
+            .then((response) => response.json()) // Menangani response JSON dari server
+            .then((data) => {
+              // Show success message
+              Swal.fire({
+                title: "Success!",
+                text: `You've received ${reward} IDR`,
+                icon: "success",
+                timer: 2000,
+                background: "rgba(17, 24, 39, 0.95)",
+                color: "#ffffff",
+                confirmButtonColor: "#818cf8",
+                confirmButtonText: "OK",
+              });
+              location.reload();
+            });
+        } else {
+          console.log("Ads not available, balance not added");
+          showErrorMessage();
+        }
+
+        console.log("Applying cooldown to task buttons");
+
+        // Add cooldown to buttons
+        const buttons = document.querySelectorAll(".claim-button");
+        buttons.forEach((button) => {
+          const originalText = button.textContent;
+          button.disabled = true;
+          button.textContent = "Cooldown: 60s";
+
+          let cooldown = 60;
+          const interval = setInterval(() => {
+            cooldown--;
+            button.textContent = `Cooldown: ${cooldown}s`;
+
+            if (cooldown <= 0) {
+              clearInterval(interval);
+              button.textContent = originalText;
+              button.disabled = false;
+              console.log(`Cooldown finished for button "${originalText}"`);
+            }
+          }, 1000);
+        });
+      }
+
+      // Show specific page content
+      function showPage(page) {
+        console.log(`Showing page: ${page}`);
+
+        // Hide all content
+        document.getElementById("home-content").style.display = "none";
+        document.getElementById("withdraw-content").style.display = "none";
+        document.getElementById("history-content").style.display = "none";
+        document.getElementById("regis-content").style.display = "none";
+
+        // Show selected content
+        if (page === "home") {
+          document.getElementById("home-content").style.display = "block";
+          const tg = window.Telegram.WebApp;
+          const user_id = tg.initDataUnsafe.user.id;
+          const formData = {
+            uid: user_id,
+          };
+          fetch("/info", {
+            method: "POST", // Metode request (POST)
+            headers: {
+              "Content-Type": "application/json", // Mengirim data dalam format JSON
+            },
+            body: JSON.stringify(formData), // Mengirim data sebagai JSON
+          })
+            .then((response) => response.json()) // Menangani response JSON dari server
+            .then((data) => {
+              document.getElementById("user-balance").innerHTML =
+                data.data[0][1];
+              const taskContainer = document.getElementById("task");
+              taskContainer.innerHTML = "";
+              if (data.data[0][2] !== null) {
+                data.data.forEach((task) => {
+                  let taskHTML = ""; // Deklarasikan taskHTML di luar if-else agar bisa digunakan di mana saja
+
+                  if (task[4] === "Click Ads") {
+                    taskHTML = `
+                            <div class="task-card">
+                            <div class="task-header">
+                                <div class="task-icon">
+                                <i class="fa fa-mouse-pointer"></i>
+                                </div>
+                                <div>
+                                <div class="task-title">${task[4]}</div>
+                                <div class="task-subtitle">Available now</div>
+                                </div>
+                            </div>
+                            <div class="task-action">
+                                <div class="reward-badge">
+                                <i class="fa fa-coins" style="margin-right: 5px"></i>
+                                ${task[5]} IDR
+                                </div>
+                                <button id="klikBtn" class="claim-button" data-id="${task[2]}" data-reward="${task[5]}" onclick="klik(this)">
+                                Claim Reward
+                                </button>
+                            </div>
+                            </div>
+                        `;
+                  } else {
+                    taskHTML = `
+                            <div class="task-card">
+                            <div class="task-header">
+                                <div class="task-icon">
+                                <i class="fa fa-users"></i>
+                                </div>
+                                <div>
+                                <div class="task-title">${task[4]}</div>
+                                <div class="task-subtitle">Daily bonus</div>
+                                </div>
+                            </div>
+                            <div class="task-action">
+                                <div class="reward-badge">
+                                <i class="fa fa-coins" style="margin-right: 5px"></i>
+                                ${task[5]} IDR
+                                </div>
+                                <button id="startAdBtn" class="claim-button" data-id="${task[2]}" data-url="${task[3]}" data-reward="${task[5]}" onclick="startAd(this)">
+                                Claim Reward
+                                </button>
+                            </div>
+                            </div>
+                        `;
+                  }
+
+                  // Menambahkan HTML baru ke task container
+                  taskContainer.insertAdjacentHTML("beforeend", taskHTML);
+                });
+              }
+            })
+            .catch((error) => {
+              alert(error);
+            });
+        } else if (page === "withdraw") {
+          document.getElementById("withdraw-content").style.display = "block";
+          const tg = window.Telegram.WebApp;
+          document.getElementById("user_id").value = tg.initDataUnsafe.user.id;
+
+          const formData = {
+            tele_id: tg.initDataUnsafe.user.id,
+          };
+
+          fetch("/getInfoWD", {
+            method: "POST", // Metode request (POST)
+            headers: {
+              "Content-Type": "application/json", // Mengirim data dalam format JSON
+            },
+            body: JSON.stringify(formData), // Mengirim data sebagai JSON
+          })
+            .then((response) => response.json()) // Menangani response JSON dari server
+            .then((data) => {
+              if (data.data[3] !== null) {
+                document.getElementById("account-number").value = data.data[3];
+
+                document.getElementById("payment-method").value = data.data[4];
+                document.getElementById("account-number").disabled = true;
+                document.getElementById("payment-method").disabled = true;
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error); // Menangani jika ada error
+              alert(error);
+            });
+        } else if (page === "history") {
+          document.getElementById("history-content").style.display = "block";
+          const tg = window.Telegram.WebApp;
+          const tele_id = tg.initDataUnsafe.user.id;
+
+          const formData = {
+            tele_id: tele_id,
+          };
+
+          fetch("/wd-history", {
+            method: "POST", // Metode request (POST)
+            headers: {
+              "Content-Type": "application/json", // Mengirim data dalam format JSON
+            },
+            body: JSON.stringify(formData), // Mengirim data sebagai JSON
+          })
+            .then((response) => response.json()) // Menangani response JSON dari server
+            .then((data) => {
+              if (data.data !== null) {
+                const historyData = data.data;
+                // Jika ada riwayat penarikan, tampilkan
+                const noHistory = document.getElementById("no-history");
+                const historyList = document.getElementById("history-list");
+                historyList.innerHTML = "";
+
+                if (historyData.length > 0) {
+                  // Hapus pesan "No history" jika ada riwayat
+                  noHistory.style.display = "none";
+
+                  // Looping untuk menampilkan riwayat
+                  historyData.forEach((history) => {
+                    const historyItemHTML = `
+                    <div class="wd-history-item">
+                        <div class="wd-history-title">Withdrawal #${history[0]}</div>
+                        <div class="wd-history-text">Total: ${history[2]} IDR</div>
+                        <div class="wd-history-text">Status: ${history[5]}</div>
+                        <div class="wd-history-date">Date: ${history[6]}</div>
+                    </div>
+                    `;
+                    historyList.innerHTML += historyItemHTML;
+                  });
+                }
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error); // Menangani jika ada error
+              alert("An error occurred");
+            });
+        } else if (page === "regis") {
+          document.getElementById("regis-content").style.display = "block";
+          document.getElementById("navigation").style.display = "none";
+        }
+
+        // Update active nav button
+        const navButtons = document.querySelectorAll(".nav-button");
+        navButtons.forEach((button) => {
+          button.classList.remove("active");
+          if (button.getAttribute("onclick").includes(page)) {
+            button.classList.add("active");
+          }
+        });
+      }
+
+      // Utility functions
+      function getMethodName(method) {
+        const methods = {
+          dana: "DANA",
+          gopay: "GoPay",
+          ovo: "OVO",
+          bank: "Bank Transfer",
+        };
+        return methods[method] || method;
+      }
+
+      function refreshPage() {
+        console.log("Page reloaded by user");
+        location.reload();
+      }
+
+      // Initialize
+      window.onload = function () {
+        const bot_token = "{{data[1]}}";
+
+        // Inisialisasi Telegram WebApp
+        const tg = window.Telegram.WebApp;
+
+        // Ambil data pengguna yang diakses dari Telegram
+        const user_id = tg.initDataUnsafe.user.id; // ID pengguna
+
+        const formData = {
+          uid: user_id,
+        };
+
+        fetch("/info-user", {
+          method: "POST", // Metode request (POST)
+          headers: {
+            "Content-Type": "application/json", // Mengirim data dalam format JSON
+          },
+          body: JSON.stringify(formData), // Mengirim data sebagai JSON
+        })
+          .then((response) => response.json()) // Menangani response JSON dari server
+          .then((data) => {
+            if (data.data.length === 0) {
+              showPage("regis");
+              document.getElementById('loadingSpinner').style.display = 'none';
+              const username = tg.initDataUnsafe.user.username; // Username pengguna
+              if (!username || username.trim() === "") {
+                Swal.fire({
+                  title: "Pemberitahuan!",
+                  text: "Harap atur username/foto profil pada akun anda.",
+                  icon: "error",
+                  confirmButtonText: "Try Again",
+                });
+              } else {
+                document.getElementById("userId").value = user_id;
+                document.getElementById("userUsername").innerHTML = username
+                  ? username
+                  : "N/A";
+
+                fetchTelegramProfilePhoto(bot_token, user_id);
+              }
+            } else {
+              showPage("home");
+              document.getElementById('loadingSpinner').style.display = 'none';
+            }
+          })
+          .catch((error) => {
+            alert(error);
+          });
+
+        // Initialize Telegram Ads Controller
+        if (typeof TelegramAdsController !== "undefined") {
+          window.adsAvailable = true;
+        } else {
+          console.error("TelegramAdsController not available");
+          window.adsAvailable = false;
+        }
+
+        // Initialize ad blocker detection
+        detectAdBlock();
+      };
+    </script>
+  </body>
+</html>

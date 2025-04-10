@@ -1,0 +1,124 @@
+{% extends "template.html" %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-9 d-flex">
+    <div class="card flex-fill">
+      <table id="dataTable">
+        <thead class="text-center">
+          <tr>
+            <th>Username</th>
+            <th>Withdraw</th>
+            <th>Payment Method</th>
+            <th>No.HP / Rekening</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <nav>
+        <ul class="pagination" id="paginationControls">
+          <li class="page-item"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+  let data = {{pay | tojson }};
+
+  const itemsPerPage = 10;
+  let currentPage = 1;
+
+  // Function to load data into table
+  function loadTableData(page = 1) {
+    const tableBody = $("#dataTable tbody");
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageData = data.slice(start, end);
+
+    // Remove all rows except the first one (input row)
+    tableBody.find("tr:not(:first)").remove();
+
+    // Add data rows
+    pageData.forEach((item) => {
+      tableBody.append(`
+        <tr>
+          <td>${item[1]}</td>
+          <td>${item[2]}</td>
+          <td>${item[3]}</td>
+          <td>${item[4]}
+          </td>
+          <td>
+            <select
+              id="inputJenis-${item[0]}"
+              class="form-select"
+              aria-label="Select Type"
+              onchange="updateStatus(${item[0]})"
+            >
+              <option value="Pending" ${item[5] === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Success" ${item[5] === 'Success' ? 'selected' : ''}>Success</option>
+              <option value="Canceled" ${item[5] === 'Canceled' ? 'selected' : ''}>Canceled</option>
+            </select>
+          </td>
+        </tr>
+      `);
+    });
+
+    updatePaginationControls(page);
+  }
+
+  function updateStatus(paymentId) {
+    const status = document.getElementById(`inputJenis-${paymentId}`).value;
+    console.log("Selected status:", status);  // Debugging: cek nilai yang dipilih
+
+    // Gunakan fetch untuk mengirimkan pembaruan ke server
+    fetch('/payment-update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        "paymentId": paymentId,
+        "status": status
+      }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.msg === "success") {
+        toastr.success('Data berhasil diperbarui.', 'Success');
+        location.reload();
+      } else {
+        console.error('Gagal memperbarui status');
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  }
+
+
+  // Function to update pagination controls
+  function updatePaginationControls(currentPage) {
+    const totalPages = Math.ceil(data.length / itemsPerPage);
+    let paginationHTML = "";
+
+    for (let i = 1; i <= totalPages; i++) {
+      paginationHTML += `
+        <li class="page-item"><a class="page-link" href="#" onclick="goToPage(${i})">${i}</a></li>
+      `;
+    }
+
+    $("#paginationControls").html(paginationHTML);
+  }
+
+  // Function to go to a specific page
+  function goToPage(page) {
+    currentPage = page;
+    loadTableData(currentPage);
+  }
+
+  // Initialize table with existing data
+  loadTableData(currentPage);
+</script>
+{% endblock %}

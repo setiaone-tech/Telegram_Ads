@@ -1,0 +1,101 @@
+{% extends "template.html" %} {% block content %}
+<div class="row justify-content-center">
+  <!-- Row 1: Cards with Flexbox -->
+  <div class="col-md-9 d-flex">
+    <div class="card flex-fill m-2">
+      <h5>Total Users</h5>
+      {{user | length}}
+    </div>
+    <div class="card flex-fill m-2">
+      <h5>Total Task</h5>
+      {{task | length}}
+    </div>
+  </div>
+
+  <!-- Row 2: Full width card -->
+  <div class="col-md-9 d-flex">
+    <div class="card flex-fill m-2">
+      <h5>Total Withdraw</h5>
+      Rp. {{total[0]}}
+    </div>
+  </div>
+
+  <div class="col-md-9 d-flex">
+    <div class="card flex-fill m-2">
+      <h5>Total Withdraw Users</h5>
+      <table id="dataTable">
+        <thead class="text-center">
+          <tr>
+            <th>Username</th>
+            <th>Telegram ID</th>
+            <th>Total Withdraw</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <nav>
+        <ul class="pagination" id="paginationControls">
+          <li class="page-item"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block extra_js %}
+<script>
+  let data = {{data | tojson}};
+
+  const itemsPerPage = 10;
+  let currentPage = 1;
+
+  // Function to load data into table
+  function loadTableData(page = 1) {
+    const tableBody = $("#dataTable tbody");
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageData = data.slice(start, end);
+
+    // Remove all rows except the first one (input row)
+    tableBody.find("tr:not(:first)").remove();
+
+    // Add data rows
+    pageData.forEach((item) => {
+      tableBody.append(`
+        <tr>
+          <td>${item[0]}</td>
+          <td>${item[1]}</td>
+          <td>${item[2]}</td>
+        </tr>
+      `);
+    });
+
+    updatePaginationControls(page);
+  }
+
+  // Function to update pagination controls
+  function updatePaginationControls(currentPage) {
+    const totalPages = Math.ceil(data.length / itemsPerPage);
+    let paginationHTML = "";
+
+    for (let i = 1; i <= totalPages; i++) {
+      paginationHTML += `
+        <li class="page-item"><a class="page-link" href="#" onclick="goToPage(${i})">${i}</a></li>
+      `;
+    }
+
+    $("#paginationControls").html(paginationHTML);
+  }
+
+  // Function to go to a specific page
+  function goToPage(page) {
+    currentPage = page;
+    loadTableData(currentPage);
+  }
+
+  // Initialize table with existing data
+  loadTableData(currentPage);
+</script>
+{% endblock %}
